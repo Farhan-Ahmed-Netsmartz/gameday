@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./react-client
+    ports:
+      - "8080:8080"
+      
+
+
+  backend:
+    build: ./node-express-server
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_NAME: testdb
+    depends_on:
+      - db
+    secrets:
+      - db_password
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: root
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    secrets:
+      - mysql_root_password
+      - mysql_password
+
+secrets:
+  db_password:
+    external: true
+  mysql_root_password:
+    external: true
+  mysql_password:
+    external: true
+
+volumes:
+  mysql-data:
